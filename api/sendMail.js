@@ -2,20 +2,22 @@ import nodemailer from 'nodemailer';
 import sanitizeHTML from 'sanitize-html';
 
 const rateLimit = (history, key, rateLimit, timeLimit) => {
-  console.dir(history);
-  if (!history[key]) history[key] = { counter: 1, time: Date.now() };
-  else history[key].counter++;
+  if (!history.has(key)) history.set(key, { counter: 0, time: Date.now() });
 
-  if (Date.now() - history[key].time > timeLimit) {
-    history[key].counter = 1;
-    history[key].time = Date.now();
+  const user = history.get(key);
+  user.counter++;
+
+  if (Date.now() - user.time > timeLimit) {
+    user.counter = 1;
+    user.time = Date.now();
     return true;
   }
 
-  return history[key].counter <= rateLimit;
+  console.log(history);
+  return user.counter <= rateLimit;
 };
 
-const history = {};
+const history = new Map();
 const defaultRateLimit = {
   count: 4,
   time: 5 * 60 * 1000,
@@ -23,17 +25,37 @@ const defaultRateLimit = {
 
 export default async (req, res) => {
   try {
-    const ip = req.headers['x-forwarded-for'];
+    const ips = req.headers['x-forwarded-for'];
+    const ip = Array.isArray(ips) ? ips[0] : ips;
+    console.log(ip);
 
     if (
       !rateLimit(history, ip, defaultRateLimit.count, defaultRateLimit.time)
     ) {
-      res.status(429).send('Rate limit exceeded');
+      res.status(429).json({
+        errors: [
+          {
+            id: Date.now(),
+            status: '429',
+            title: 'Too many requests',
+            detail: 'request limit exceeded, try again later',
+          },
+        ],
+      });
       return;
     }
 
     if (!req.body.name || !req.body.email || !req.body.message) {
-      res.status(400).send('Required fields must not be empty');
+      res.status(400).json({
+        errors: [
+          {
+            id: Date.now(),
+            status: '400',
+            title: 'Bad request',
+            detail: 'required fields must not be empty',
+          },
+        ],
+      });
       return;
     }
 
@@ -58,10 +80,20 @@ export default async (req, res) => {
       html: clearHtml,
     });
 
-    console.log('Message sent: %s', info.messageId);
-
-    res.status(200);
+    res.status(200).json({
+      meta: {
+        data: `Message sent: ${info.messageId}`,
+      },
+    });
   } catch (err) {
-    res.status(500).send(err.message);
+    res.status(500).json({
+      errors: [
+        {
+          id: Date.now(),
+          status: '500',
+          title: 'Internal server error',
+        },
+      ],
+    });
   }
 };

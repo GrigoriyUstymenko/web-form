@@ -12,7 +12,7 @@
     shown = true;
     if (err) {
       successful = false;
-      message = `Your message was not sent: ${err.message}`;
+      message = `${err.message}`;
       return;
     }
     message = 'Your message was successfully sent';

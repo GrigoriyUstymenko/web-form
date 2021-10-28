@@ -21,11 +21,9 @@
     showingSpinner = true;
     buttonDisabled = true;
 
-    const data = {
-      name: form.elements.userName.value,
-      email: form.elements.userEmail.value,
-      message: form.elements.messageText.value,
-    };
+    const data = {};
+    Array.from(form.elements).forEach(e => (data[e.name] = e.value));
+    console.log(data);
 
     try {
       console.log(data);
@@ -37,8 +35,9 @@
         body: JSON.stringify(data),
       });
       if (!response.ok) {
-        const res = await response.text();
-        throw new Error(res);
+        const res = await response.json();
+        const errText = res.errors[0].title + ': ' + res.errors[0].detail;
+        throw new Error(errText);
       }
       modal.show();
     } catch (err) {
@@ -62,7 +61,7 @@
     <input
       class="mail-form-content mail-form-input"
       type="text"
-      name="userName"
+      name="name"
       placeholder="Enter your name"
       required
     />
@@ -70,13 +69,13 @@
       class="mail-form-content mail-form-input"
       type="text"
       pattern={EMAIL_REGEX}
-      name="userEmail"
+      name="email"
       placeholder="Enter your email"
       required
     />
     <textarea
       class="mail-form-content mail-form-textarea"
-      name="messageText"
+      name="message"
       placeholder="Enter your message"
       required
     />
