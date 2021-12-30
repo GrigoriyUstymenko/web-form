@@ -25,8 +25,7 @@ const defaultRateLimit = {
 
 export default async (req, res) => {
   try {
-    const ips = req.headers['x-forwarded-for'];
-    const ip = Array.isArray(ips) ? ips[0] : ips;
+    const ip = req.headers['x-forwarded-for'];
     console.log(ip);
 
     if (

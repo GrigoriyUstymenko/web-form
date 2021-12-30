@@ -1,10 +1,8 @@
 <script>
-  export const prerender = true;
   import { Circle } from 'svelte-loading-spinners';
   import Modal from '$lib/Modal.svelte';
   let form;
   let modal;
-  const spinnerColor = '#4d4d4d';
 
   let buttonDisabled = false;
   let showingSpinner = false;
@@ -24,6 +22,7 @@
     const data = {};
     Array.from(form.elements).forEach(e => (data[e.name] = e.value));
     console.log(data);
+    let error = null;
 
     try {
       console.log(data);
@@ -36,12 +35,14 @@
       });
       if (!response.ok) {
         const res = await response.json();
+        if (!res.errors?.length) throw new Error('An unknown error occurred!');
         const errText = res.errors[0].title + ': ' + res.errors[0].detail;
         throw new Error(errText);
       }
-      modal.show();
-    } catch (err) {
-      modal.show(err);
+    } catch (responseErr) {
+      error = responseErr;
+    } finally {
+      modal.show(error);
     }
   }
 </script>
@@ -85,7 +86,7 @@
       disabled={buttonDisabled}>Submit</button
     >
     {#if showingSpinner}
-      <Circle color={spinnerColor} />
+      <Circle color="var(--spinner-color)" />
     {/if}
   </form>
   <Modal bind:this={modal}>
