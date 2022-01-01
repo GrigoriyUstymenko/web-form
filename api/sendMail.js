@@ -23,6 +23,16 @@ const defaultRateLimit = {
   time: 5 * 60 * 1000,
 };
 
+const transporter = nodemailer.createTransport({
+  host: process.env.HOST,
+  port: process.env.PORT,
+  secure: false,
+  auth: {
+    user: process.env.USERNAME,
+    pass: process.env.PASSWORD,
+  },
+});
+
 export default async (req, res) => {
   try {
     const ip = req.headers['x-forwarded-for'];
@@ -57,16 +67,6 @@ export default async (req, res) => {
       });
       return;
     }
-
-    const transporter = nodemailer.createTransport({
-      host: process.env.HOST,
-      port: process.env.PORT,
-      secure: false,
-      auth: {
-        user: process.env.USERNAME,
-        pass: process.env.PASSWORD,
-      },
-    });
 
     const html = `Name: ${req.body.name}<br>Email: ${req.body.email}<br>${req.body.message}`;
     const clearHtml = sanitizeHTML(html);
