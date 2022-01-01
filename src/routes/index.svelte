@@ -35,8 +35,9 @@
       });
       if (!response.ok) {
         const res = await response.json();
-        if (!res.errors?.length) throw new Error('An unknown error occurred!');
-        const errText = res.errors[0].title + ': ' + res.errors[0].detail;
+        const errText = res.errors?.length
+          ? res.errors[0].title + ': ' + res.errors[0].detail
+          : 'An unknown error occurred!';
         throw new Error(errText);
       }
     } catch (responseErr) {
