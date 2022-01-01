@@ -71,7 +71,7 @@ export default async (req, res) => {
     const html = `Name: ${req.body.name}<br>Email: ${req.body.email}<br>${req.body.message}`;
     const clearHtml = sanitizeHTML(html);
 
-    let info = await transporter.sendMail({
+    const info = await transporter.sendMail({
       from: process.env.SOURCE,
       to: process.env.USERNAME,
       subject: 'Contact form message',
