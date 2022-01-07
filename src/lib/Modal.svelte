@@ -1,7 +1,7 @@
 <script>
   let shown = false;
   let message;
-  let success;
+  let successful;
 
   export const hide = () => {
     shown = false;
@@ -10,11 +10,11 @@
   export const show = err => {
     shown = true;
     if (err) {
-      success = 'failed';
+      successful = false;
       message = `${err.message}`;
       return;
     }
-    success = 'successful';
+    successful = true;
     message = 'Your message was successfully sent';
   };
 </script>
@@ -22,7 +22,7 @@
 {#if shown}
   <div class="modal-wrapper">
     <div class="modal">
-      <p class={`message-${success}`}>{message}</p>
+      <p class:successful>{message}</p>
       <slot />
     </div>
   </div>
@@ -51,17 +51,14 @@
     max-width: 40vw;
     padding: 1rem;
     margin: 15% auto;
+    color: var(--message-err-color);
   }
 
   .modal > p {
     font-weight: bold;
   }
 
-  .message-successful {
+  .successful {
     color: var(--message-suc-color);
-  }
-
-  .message-failed {
-    color: var(--message-err-color);
   }
 </style>
